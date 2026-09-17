@@ -1,0 +1,13 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [RC522.PrjPcb]
+   Generated File[RC522.TXT]
+   Generated File[RC522-RectHoles.TXT]
+   Generated File[RC522.LDP]
+   Generated File[RC522.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 11:30:20 PM On 9/13/2026
