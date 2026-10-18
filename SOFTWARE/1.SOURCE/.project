@@ -91,6 +91,11 @@
 			<location>C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c</location>
 		</link>
 		<link>
+			<name>Drivers/STM32F1xx_HAL_Driver/stm32f1xx_hal_spi.c</name>
+			<type>1</type>
+			<location>C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c</location>
+		</link>
+		<link>
 			<name>Drivers/STM32F1xx_HAL_Driver/stm32f1xx_hal_uart.c</name>
 			<type>1</type>
 			<location>C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c</location>

@@ -20,7 +20,10 @@ Core/Src/stm32f1xx_it.o: ../Core/Src/stm32f1xx_it.c ../Core/Inc/main.h \
  C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h \
  C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h \
  C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h \
+ C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h \
  C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
+ C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h \
+ C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
  ../Core/Inc/stm32f1xx_it.h
 ../Core/Inc/main.h:
 C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
@@ -44,5 +47,8 @@ C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL
 C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_cortex.h:
 C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h:
 C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h:
+C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h:
 C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
+C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h:
+C:/Users/Quynh/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.7/Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
 ../Core/Inc/stm32f1xx_it.h:
