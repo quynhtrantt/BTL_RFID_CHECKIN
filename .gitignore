@@ -1,0 +1,20 @@
+# Bỏ qua các thư mục chứa file biên dịch (.o, .elf, .bin, .hex)
+Debug/
+Release/
+build/
+
+# Bỏ qua các file cấu hình Debug/Run cá nhân của IDE
+*.launch
+
+# Bỏ qua các file báo cáo và log của STM32CubeMX sinh ra
+*.log
+.mxproject
+
+# Bỏ qua các file rác của hệ điều hành
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# (LƯU Ý: Không bỏ qua các file .project, .cproject, .settings/ và .ioc 
+# vì đây là các file cấu hình khung project bắt buộc để người khác có thể mở được)
