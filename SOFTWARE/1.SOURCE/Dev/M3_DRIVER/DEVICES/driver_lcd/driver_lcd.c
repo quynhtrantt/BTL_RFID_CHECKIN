@@ -17,7 +17,6 @@ static void LCD_Send4Bit(uint8_t data, uint8_t rs) {
 }
 
 void Driver_LCD_Init(void) {
-    Delay(50);
     LCD_Send4Bit(0x33, 0); LCD_Send4Bit(0x32, 0);
     LCD_Send4Bit(0x28, 0); LCD_Send4Bit(0x0C, 0);
     LCD_Send4Bit(0x06, 0); Driver_LCD_Clear();
