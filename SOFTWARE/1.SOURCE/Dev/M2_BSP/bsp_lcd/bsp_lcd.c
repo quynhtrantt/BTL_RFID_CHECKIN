@@ -1,7 +1,7 @@
 #ifndef M2_BSP_BSP_LCD_BSP_LCD_C_
 #define M2_BSP_BSP_LCD_BSP_LCD_C_
 
-#include "bsp_lcd.h"
+#include <bsp_lcd/bsp_lcd.h>
 #include "stm32f1xx_hal.h"
 #include "driver_i2c.h"
 #include "driver_gpio.h"

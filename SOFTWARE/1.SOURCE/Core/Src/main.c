@@ -62,6 +62,7 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
 
@@ -98,7 +99,10 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+  /* USER CODE BEGIN 2 */
+
   app_main();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
