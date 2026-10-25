@@ -124,11 +124,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Dev"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/Dev/M3_DRIVER"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/Dev/M0_APP"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/Dev/M2_BSP"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/Dev/M3_DRIVER"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Dev"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 					</sourceEntries>
 				</configuration>

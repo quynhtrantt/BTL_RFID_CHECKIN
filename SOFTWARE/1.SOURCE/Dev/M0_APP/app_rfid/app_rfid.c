@@ -1,50 +1,58 @@
 #include "app_rfid.h"
-#include "app_lcd.h"
 #include "bsp_rfid.h"
-#include "driver_rfid.h"
-#include "driver_gpio.h"
+#include "bsp_buzzer.h"
+#include <string.h>
 
-volatile bool flag_RFID_Scanned = false;
-static uint32_t last_scan_time = 0;
-static bool is_displaying_result = false;
+extern volatile bool flag_RFID_Scanned;
 
-const uint8_t VALID_CARD[4] = {0x11, 0x22, 0x33, 0x44};
+typedef struct {
+    uint8_t uid[5];
+    uint8_t valid;
+} CardDB_t;
 
-void App_RFID_Init(void) {
-    BSP_RFID_Setup();
+static CardDB_t database[MAX_CARDS];
+
+void App_RFID_InitDB(void) {
+    for (int i = 0; i < MAX_CARDS; i++) database[i].valid = 0;
 }
 
-void App_RFID_Task(void) {
-    if (is_displaying_result && (Driver_GetTick() - last_scan_time > 1500)) {
-        is_displaying_result = false;
-        App_LCD_Init();
-    }
+bool App_RFID_HasNewCard(RFID_UID_t *out_card)
+{
+    if (flag_RFID_Scanned)
+    {
+        bool status = BSP_RFID_ReadCard(out_card);
 
-    if (flag_RFID_Scanned == true) {
+        BSP_RFID_ClearInterrupt();
+        BSP_RFID_ArmInterrupt();
         flag_RFID_Scanned = false;
 
-        if (Driver_GetTick() - last_scan_time < 1500) {
-            Driver_RFID_ClearInterrupt();
-            Driver_RFID_ArmInterrupt();
-            return;
+        if (status)
+        {
+            BSP_Signal_SuccessBeep();
+            return true;
         }
-
-        RFID_UID_t myCard;
-        if (Driver_RFID_ReadCard(&myCard)) {
-            last_scan_time = Driver_GetTick();
-            is_displaying_result = true;
-
-            bool isOk = true;
-            for(int i = 0; i < 4; i++) {
-                if(myCard.uid[i] != VALID_CARD[i]) isOk = false;
-            }
-
-            App_LCD_ShowUID(myCard.uid, myCard.size);
-            App_LCD_ShowStatus(isOk);
-        }
-
-        Driver_RFID_ClearInterrupt();
-        Driver_RFID_ArmInterrupt();
     }
+    return false;
 }
 
+int App_RFID_FindCard(RFID_UID_t *card) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (database[i].valid == 1 && memcmp(database[i].uid, card->uid, card->size) == 0) return i;
+    }
+    return -1;
+}
+
+bool App_RFID_AddCard(RFID_UID_t *card) {
+    for (int i = 0; i < MAX_CARDS; i++) {
+        if (database[i].valid == 0) {
+            memcpy(database[i].uid, card->uid, card->size);
+            database[i].valid = 1;
+            return true;
+        }
+    }
+    return false;
+}
+
+void App_RFID_DeleteCard(int index) {
+    if (index >= 0 && index < MAX_CARDS) database[index].valid = 0;
+}
