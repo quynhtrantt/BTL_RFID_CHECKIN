@@ -1,29 +1,52 @@
-#ifndef M0_APP_APP_LCD_APP_LCD_C_
-#define M0_APP_APP_LCD_APP_LCD_C_
-
-#include <bsp_lcd/bsp_lcd.h>
 #include "app_lcd.h"
 #include "driver_lcd.h"
 #include <stdio.h>
 
-void App_LCD_Init(void) {
-    BSP_LCD_Setup();
+void UI_ShowMessage(const char *line1, const char *line2)
+{
     Driver_LCD_Clear();
-    Driver_LCD_SetCursor(0, 0);
-    Driver_LCD_Print("Cho quet the");
+    if(line1)
+    {
+    	Driver_LCD_SetCursor(0, 0); Driver_LCD_Print(line1);
+    }
+    if(line2)
+    {
+    	Driver_LCD_SetCursor(0, 1); Driver_LCD_Print(line2);
+    }
 }
 
-void App_LCD_ShowUID(uint8_t *uid, uint8_t size) {
-    char buf[17] = {0};
-    sprintf(buf, "ID: %02X%02X%02X%02X     ", uid[0], uid[1], uid[2], uid[3]);
-    Driver_LCD_SetCursor(0, 0);
-    Driver_LCD_Print(buf);
+void UI_ShowIdle(void)
+{
+	UI_ShowMessage("He Thong Cua", "Quet the...");
 }
 
-void App_LCD_ShowStatus(bool isValid) {
-    Driver_LCD_SetCursor(0, 1);
-    if (isValid) Driver_LCD_Print("-> THE HOP LE   ");
-    else         Driver_LCD_Print("-> TU CHOI !    ");
+void UI_ShowChecking(RFID_UID_t *card)
+{
+    char buf[16];
+    sprintf(buf, "UID:%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3]);
+    UI_ShowMessage("Dang kiem tra...", buf);
 }
 
-#endif /* M0_APP_APP_LCD_APP_LCD_C_ */
+void UI_ShowResult(bool isValid) {
+    UI_ShowMessage(isValid ? "The Hop Le!" : "The Tu Choi!", NULL);
+}
+
+void UI_ShowUnregistered(void)
+{
+	UI_ShowMessage("The Chua Dang Ky", "Bam NUT de luu");
+}
+void UI_ShowSpecialMenu(void)
+{
+	UI_ShowMessage("1.Diem Danh ?", "Bo qua sau 5s");
+}
+void UI_ShowPasswordPrompt(const char* stars)
+{
+	UI_ShowMessage("Nhap Master Pass", stars);
+}
+
+void UI_ShowManageCard(RFID_UID_t *card)
+{
+    char buf[16];
+    sprintf(buf, "UID:%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3]);
+    UI_ShowMessage(buf, "NUT:D.Danh #:Xoa");
+}
