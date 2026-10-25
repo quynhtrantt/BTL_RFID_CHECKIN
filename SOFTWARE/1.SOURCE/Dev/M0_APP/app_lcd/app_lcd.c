@@ -1,19 +1,22 @@
 #include "app_lcd.h"
-#include "driver_lcd.h"
+#include "bsp_lcd.h"
 #include <stdio.h>
 
 void UI_ShowMessage(const char *line1, const char *line2)
 {
-    Driver_LCD_Clear();
+    BSP_LCD_Clear();
     if(line1)
     {
-    	Driver_LCD_SetCursor(0, 0); Driver_LCD_Print(line1);
+    	BSP_LCD_SetCursor(0, 0);
+        BSP_LCD_Print(line1);
     }
     if(line2)
     {
-    	Driver_LCD_SetCursor(0, 1); Driver_LCD_Print(line2);
+    	BSP_LCD_SetCursor(0, 1);
+        BSP_LCD_Print(line2);
     }
 }
+
 
 void UI_ShowIdle(void)
 {
@@ -35,10 +38,12 @@ void UI_ShowUnregistered(void)
 {
 	UI_ShowMessage("The Chua Dang Ky", "Bam NUT de luu");
 }
+
 void UI_ShowSpecialMenu(void)
 {
 	UI_ShowMessage("1.Diem Danh ?", "Bo qua sau 5s");
 }
+
 void UI_ShowPasswordPrompt(const char* stars)
 {
 	UI_ShowMessage("Nhap Master Pass", stars);
