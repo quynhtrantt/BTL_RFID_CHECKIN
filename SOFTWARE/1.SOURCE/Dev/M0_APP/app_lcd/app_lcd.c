@@ -20,7 +20,7 @@ void UI_ShowMessage(const char *line1, const char *line2)
 
 void UI_ShowIdle(void)
 {
-	UI_ShowMessage("He Thong Cua", "Quet the...");
+	UI_ShowMessage("Trang thai cho", "Moi quet the");
 }
 
 void UI_ShowChecking(RFID_UID_t *card)

@@ -11,7 +11,7 @@ extern UART_HandleTypeDef huart1;
 #define BUTTON_1_PIN    GPIO_PIN_12
 
 #define LED_RED_PORT    GPIOB
-#define LED_RED_PIN     GPIO_PIN_13
+#define LED_RED_PIN     GPIO_PIN_15
 #define LED_GREEN_PORT  GPIOB
 #define LED_GREEN_PIN   GPIO_PIN_14
 
@@ -35,7 +35,7 @@ extern UART_HandleTypeDef huart1;
 #define KEYPAD_C0_PIN   GPIO_PIN_4
 #define KEYPAD_C1_PIN   GPIO_PIN_5
 #define KEYPAD_C2_PIN   GPIO_PIN_6
-#define KEYPAD_C3_PIN   GPIO_PIN_7
+
 
 #define EEPROM_WP_PORT  GPIOB
 #define EEPROM_WP_PIN   GPIO_PIN_5

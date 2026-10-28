@@ -10,11 +10,19 @@ typedef struct {
     uint8_t valid;
 } CardDB_t;
 
-static CardDB_t database[MAX_CARDS];
+static CardDB_t database[MAX_CARDS] = {
+    { .uid = {0x01, 0x02, 0x03, 0x04, 0x05}, .valid = 1 }, // Card 0
+    { .uid = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE}, .valid = 1 }, // Card 1
+    // Remaining cards up to MAX_CARDS automatically initialize to all zeros
+};
+
+//la =50 the
 
 void App_RFID_InitDB(void) {
     for (int i = 0; i < MAX_CARDS; i++) database[i].valid = 0;
 }
+uint8_t hardcode_uid_1[5] = {0x12, 0x34, 0x56, 0x78, 0x90};
+
 
 bool App_RFID_HasNewCard(RFID_UID_t *out_card)
 {
@@ -28,7 +36,7 @@ bool App_RFID_HasNewCard(RFID_UID_t *out_card)
 
         if (status)
         {
-            BSP_Signal_SuccessBeep();
+            BSP_BuzzerStart();
             return true;
         }
     }
