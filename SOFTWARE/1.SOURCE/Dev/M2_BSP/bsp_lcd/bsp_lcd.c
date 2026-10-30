@@ -1,6 +1,5 @@
 #include "bsp_lcd.h"
 #include "driver_lcd.h"
-#include "driver_i2c.h"
 
 #define MODULE_I2C_ADDR 0x27
 

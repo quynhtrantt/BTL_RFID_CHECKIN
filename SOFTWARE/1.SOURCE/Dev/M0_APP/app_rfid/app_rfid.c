@@ -36,7 +36,7 @@ bool App_RFID_HasNewCard(RFID_UID_t *out_card)
 
         if (status)
         {
-            BSP_BuzzerStart();
+            //BSP_BuzzerStart();
             return true;
         }
     }
