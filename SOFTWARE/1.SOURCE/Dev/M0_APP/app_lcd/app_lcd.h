@@ -3,6 +3,8 @@
 
 #include "bsp_rfid.h"
 
+bool App_LCD_Init(void);
+
 void UI_ShowIdle(void);
 void UI_ShowChecking(RFID_UID_t *card);
 void UI_ShowResult(bool isValid);

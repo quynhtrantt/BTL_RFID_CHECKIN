@@ -22,11 +22,11 @@ void app_main(void)
 	BSP_LCD_Init();
 	//UI_ShowIdle ();
 
-	BSP_LCD_SetCursor(0, 0);
-	BSP_LCD_Print("HELLO WORLD");
+	//BSP_LCD_SetCursor(0, 0);
+	//BSP_LCD_Print("HELLO WORLD");
 
-	BSP_LCD_SetCursor(0, 1);
-	BSP_LCD_Print("LCD TEST");
+	//BSP_LCD_SetCursor(0, 1);
+	//BSP_LCD_Print("LCD TEST");
 	while (1)
 	{
 

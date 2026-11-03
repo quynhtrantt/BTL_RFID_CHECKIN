@@ -13,3 +13,4 @@ bool Driver_PCF8574_WritePort(uint8_t data)
 {
     return Driver_I2C_Write(pcf_addr, &data, 1U);
 }
+

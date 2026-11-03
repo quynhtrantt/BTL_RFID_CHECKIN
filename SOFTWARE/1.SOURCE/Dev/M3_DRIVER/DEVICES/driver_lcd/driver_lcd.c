@@ -10,25 +10,43 @@
 
 static uint8_t lcd_addr;
 
-/* Ghi 1 nibble 4-bit ra PCF8574 */
 static void LCD_Write4Bits(uint8_t nibble, uint8_t isData)
+{
+    // Cờ RS (1 là ghi chữ, 0 là ghi lệnh)
+    uint8_t rs = (isData != 0U) ? LCD_RS : 0U;
+
+    // Đóng gói data: Dữ liệu + RS + Đèn nền
+    uint8_t out = (uint8_t)(((nibble & 0x0FU) << 4) | rs | LCD_BL);
+
+    // BẮT BUỘC PHẢI CÓ 3 NHỊP NÀY ĐỂ PROTEUS KỊP ĐỌC
+    // Nhịp 1: Gửi data chuẩn bị (EN = 0)
+    Driver_PCF8574_WritePort(out);
+    HAL_Delay(1);
+
+    // Nhịp 2: Chớp EN lên cao (EN = 1)
+    Driver_PCF8574_WritePort(out | LCD_EN);
+    HAL_Delay(1);
+
+    // Nhịp 3: Chốt EN xuống thấp (EN = 0)
+    Driver_PCF8574_WritePort(out);
+    HAL_Delay(1);
+}
+
+/*
+static void LCD_Write4Bits(uint8_t nibble, uint8_t isData) //ghi data ra pcf
 {
     uint8_t value = (uint8_t)((nibble & 0x0FU) << 4);
 
     value |= LCD_BL;
-
-    /* RS = 1: ghi dữ liệu; RS = 0: ghi lệnh */
-    if (isData != 0U) {
+    if (isData != 0U) { //rs=1 ghi data
         value |= LCD_RS;
     }
 
-    /* EN lên mức cao rồi xuống thấp */
     Driver_PCF8574_WritePort(value | LCD_EN);
     Driver_PCF8574_WritePort(value);
 }
-
-/* Gửi lệnh LCD */
-static void LCD_SendCmd(uint8_t cmd)
+*/
+static void LCD_SendCmd(uint8_t cmd) //send command lcd
 {
     LCD_Write4Bits((uint8_t)(cmd >> 4), 0U);
     LCD_Write4Bits((uint8_t)(cmd & 0x0FU), 0U);
@@ -38,7 +56,7 @@ static void LCD_SendCmd(uint8_t cmd)
     }
 }
 
-/* Gửi dữ liệu/ký tự LCD */
+
 static void LCD_SendData(uint8_t data)
 {
     LCD_Write4Bits((uint8_t)(data >> 4), 1U);
@@ -49,7 +67,6 @@ void Driver_LCD_Init(uint8_t i2c_addr)
 {
     lcd_addr = i2c_addr;
 
-    /* Khởi tạo PCF8574 trước khi điều khiển LCD */
     if (!Driver_PCF8574_Init(lcd_addr)) {
         return;
     }
@@ -66,20 +83,20 @@ void Driver_LCD_Init(uint8_t i2c_addr)
     LCD_Write4Bits(0x03U, 0U);
     HAL_Delay(1);
 
-    /* Chuyển sang chế độ 4-bit */
     LCD_Write4Bits(0x02U, 0U);
     HAL_Delay(1);
 
     LCD_SendCmd(0x28U);
     LCD_SendCmd(0x08U);
     Driver_LCD_Clear();
-    LCD_SendCmd(0x06U);  /* Tăng địa chỉ DDRAM */
-    LCD_SendCmd(0x0CU);  /* Bật hiển thị, tắt cursor */
+    LCD_SendCmd(0x06U);
+    LCD_SendCmd(0x0CU);
 }
 
 void Driver_LCD_Clear(void)
 {
     LCD_SendCmd(0x01U);
+
 }
 
 void Driver_LCD_SetCursor(uint8_t col, uint8_t row)
