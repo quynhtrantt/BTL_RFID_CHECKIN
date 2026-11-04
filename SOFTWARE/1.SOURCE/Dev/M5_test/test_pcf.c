@@ -20,15 +20,19 @@ void app_main(void)
 
 	//BSP_LED_Red_Set(0);
 	App_LCD_Init();
-
+	Fake_RFID_Init();
 	//Driver_PCF8574_Init(MODULE_I2C_ADDR);
 	//Driver_PCF8574_WritePort(3);
 	//BSP_LCD_Init();
 	UI_ShowIdle();
-
+	RFID_UID_t card;
 	while (1)
 	{
+		if (Fake_RFID_ReadCard(&card) == true)
+		 {
+			UI_ShowChecking(&card);
 
-		  HAL_Delay(100);
+			UI_ShowIdle();
+		  }
 	}
 }

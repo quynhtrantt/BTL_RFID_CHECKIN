@@ -55,7 +55,6 @@ static void Bus_Init(void)
     ready = true;
 }
 
-/* Tha SCL len muc cao */
 static bool SCL_Release(void)
 {
     SCL(true);
@@ -72,7 +71,6 @@ static bool SCL_Release(void)
     return true;
 }
 
-/* START condition */
 static bool Start(void)
 {
     SDA(true);
@@ -89,7 +87,6 @@ static bool Start(void)
     return true;
 }
 
-/* STOP condition */
 static bool Stop(void)
 {
     SDA(false);
@@ -104,7 +101,6 @@ static bool Stop(void)
     return true;
 }
 
-/* Ghi 1 byte, kiem tra ACK */
 static bool WriteByte(uint8_t value)
 {
     for (uint8_t mask = 0x80U; mask != 0U; mask >>= 1)
@@ -121,7 +117,6 @@ static bool WriteByte(uint8_t value)
         SCL(false);
     }
 
-    /* Tha SDA de slave phan hoi ACK */
     SDA(true);
     HalfBit();
 
@@ -139,7 +134,6 @@ static bool WriteByte(uint8_t value)
     return ack;
 }
 
-/* Doc 1 byte */
 static uint8_t ReadByte(bool ack)
 {
     uint8_t value = 0U;
@@ -164,7 +158,6 @@ static uint8_t ReadByte(bool ack)
         SCL(false);
     }
 
-    /* ACK keo SDA xuong, NACK tha SDA */
     SDA(!ack);
     HalfBit();
 
@@ -177,7 +170,6 @@ static uint8_t ReadByte(bool ack)
     return value;
 }
 
-/* Ghi nhieu byte */
 static bool WriteBytes(const uint8_t *data, uint16_t len)
 {
     for (uint16_t i = 0; i < len; i++)
@@ -189,7 +181,6 @@ static bool WriteBytes(const uint8_t *data, uint16_t len)
     return true;
 }
 
-/* Ghi du lieu */
 bool Driver_I2C_Write(uint8_t dev_addr,
                       uint8_t *data,
                       uint16_t len)
@@ -202,7 +193,6 @@ bool Driver_I2C_Write(uint8_t dev_addr,
     if (!Start())
         return false;
 
-    /* dev_addr la dia chi 7 bit */
     bool ok = WriteByte((uint8_t)(dev_addr << 1));
 
     if (ok)
@@ -213,7 +203,6 @@ bool Driver_I2C_Write(uint8_t dev_addr,
     return ok;
 }
 
-/* Ghi thanh ghi 8 bit */
 bool Driver_I2C_Mem_Write(uint8_t dev_addr,
                           uint16_t reg_addr,
                           uint8_t *data,
@@ -240,7 +229,6 @@ bool Driver_I2C_Mem_Write(uint8_t dev_addr,
     return ok;
 }
 
-/* Doc thanh ghi 8 bit */
 bool Driver_I2C_Mem_Read(uint8_t dev_addr,
                          uint16_t reg_addr,
                          uint8_t *data,
@@ -261,7 +249,7 @@ bool Driver_I2C_Mem_Read(uint8_t dev_addr,
 
     if (ok)
     {
-        /* Repeated START */
+
         ok = Start();
 
         if (ok)
@@ -282,8 +270,7 @@ bool Driver_I2C_Mem_Read(uint8_t dev_addr,
 
     return ok;
 }
-
-/* Kiem tra thiet bi co ACK khong */
+//chekc ACK
 bool Driver_I2C_IsReady(uint8_t dev_addr)
 {
     Bus_Init();
