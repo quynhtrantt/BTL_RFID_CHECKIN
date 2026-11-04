@@ -2,6 +2,12 @@
 #include "bsp_lcd.h"
 #include <stdio.h>
 
+bool App_LCD_Init(void)
+{
+    BSP_LCD_Init();
+    return true;
+}
+
 void UI_ShowMessage(const char *line1, const char *line2)
 {
     BSP_LCD_Clear();
@@ -20,7 +26,7 @@ void UI_ShowMessage(const char *line1, const char *line2)
 
 void UI_ShowIdle(void)
 {
-	UI_ShowMessage("He Thong Cua", "Quet the...");
+	UI_ShowMessage("Trang thai cho", "Moi quet the");
 }
 
 void UI_ShowChecking(RFID_UID_t *card)
