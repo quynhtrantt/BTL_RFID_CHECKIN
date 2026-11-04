@@ -14,4 +14,6 @@
 bool Driver_PCF8574_Init(uint8_t addr);
 bool Driver_PCF8574_WritePort(uint8_t data);
 
+bool Driver_PCF8574_WriteBuf(uint8_t *data, uint16_t len);
+
 #endif /* DEVICES_DRIVER_PCF8574_DRIVER_PCF8574_H_ */

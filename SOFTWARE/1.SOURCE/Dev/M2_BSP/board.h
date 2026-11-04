@@ -7,6 +7,10 @@ extern I2C_HandleTypeDef hi2c1;
 extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart1;
 
+#define I2C_PORT         GPIOB
+#define SCL_PIN         GPIO_PIN_6
+#define SDA_PIN         GPIO_PIN_7
+
 #define BUTTON_1_PORT   GPIOB
 #define BUTTON_1_PIN    GPIO_PIN_12
 
