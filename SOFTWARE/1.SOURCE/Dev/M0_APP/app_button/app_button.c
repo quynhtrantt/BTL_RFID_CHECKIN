@@ -5,11 +5,13 @@
 static bool stable_state = false;
 static uint32_t press_start_time = 0;
 static bool is_holding = false;
+static bool press_event = false;
 
 void App_Button_Task(void) {
     static uint32_t last_time = 0;
     static bool last_state = false;
     bool current_state = BSP_Button_IsPressed();
+    press_event = false;
 
     if (current_state != last_state) {
         last_time = HAL_GetTick();
@@ -23,6 +25,7 @@ void App_Button_Task(void) {
             stable_state = last_state;
             if (stable_state)
             {
+                press_event = true;
                 press_start_time = HAL_GetTick();
                 is_holding = true;
             }
@@ -34,9 +37,8 @@ void App_Button_Task(void) {
 }
 
 bool App_Button_IsPressed(void) {
-    static bool prev_state = false;
-    bool pressed = (stable_state && !prev_state);
-    prev_state = stable_state;
+    bool pressed = press_event;
+    press_event = false;
     return pressed;
 }
 

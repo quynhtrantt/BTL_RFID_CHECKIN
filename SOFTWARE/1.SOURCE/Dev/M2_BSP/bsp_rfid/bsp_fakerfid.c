@@ -24,10 +24,10 @@ static const id_fake dipswitch[8]={
 		{GPIOB, GPIO_PIN_2},
 		{GPIOB, GPIO_PIN_10},
 		{GPIOB, GPIO_PIN_11},
-		{GPIOA, GPIO_PIN_4},
-		{GPIOA, GPIO_PIN_5},
-		{GPIOA, GPIO_PIN_6},
-		{GPIOA, GPIO_PIN_7},
+		{GPIOA, GPIO_PIN_8},
+		{GPIOA, GPIO_PIN_11},
+		{GPIOA, GPIO_PIN_12},
+		{GPIOA, GPIO_PIN_15},
 	};
  void BSP_RFID_Init (void)
  {
@@ -60,10 +60,10 @@ static const id_fake dipswitch[8]={
 
 	     out_card->size = 5;
 
-	     out_card->uid[0] = 0xAA;
-	     out_card->uid[1] = 0xBB;
-	     out_card->uid[2] = 0xCC;
-	     out_card->uid[3] = 0xDD;
+	     out_card->uid[0] = 0x01;
+	     out_card->uid[1] = 0x02;
+	     out_card->uid[2] = 0x03;
+	     out_card->uid[3] = 0x04;
 	     out_card->uid[4] = raw_dip;
 	     return (HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN) == GPIO_PIN_RESET);
  }
