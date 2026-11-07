@@ -1,5 +1,5 @@
 #include "app_system.h"
-#include "../../M3_DRIVER/DEVICES/driver_mcp/driver_mcp79410.h"
+#include "driver_mcp79410.h"
 #include <string.h>
 /* EEPROM: password banks 0..15; 8 card records 16..71; 2 logs 72..127.
    Name IDs refer to the fixed seed-name dictionary; new cards have no name.

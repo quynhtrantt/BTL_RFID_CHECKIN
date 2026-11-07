@@ -8,6 +8,7 @@
 
 static bool ready = false;
 
+
 static void HalfBit(void)
 {
     for (volatile uint32_t i = 0; i < HALF_BIT_LOOPS; i++)
@@ -37,10 +38,9 @@ static void Bus_Init(void)
 {
     GPIO_InitTypeDef pin = {0};
 
-    if (ready)
-        return;
-
+    if (ready) return;
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    HAL_GPIO_WritePin(I2C_PORT, SCL_PIN | SDA_PIN, GPIO_PIN_SET);
 
     pin.Pin = SCL_PIN | SDA_PIN;
     pin.Mode = GPIO_MODE_OUTPUT_OD;
@@ -51,7 +51,6 @@ static void Bus_Init(void)
 
     SCL(true);
     SDA(true);
-
     ready = true;
 }
 
@@ -271,3 +270,4 @@ bool Driver_I2C_IsReady(uint8_t dev_addr)
 
     return ok && stopped;
 }
+

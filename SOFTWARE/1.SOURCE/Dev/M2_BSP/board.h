@@ -3,7 +3,6 @@
 
 #include "stm32f1xx_hal.h"
 
-extern I2C_HandleTypeDef hi2c1;
 extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart1;
 
@@ -11,6 +10,11 @@ extern UART_HandleTypeDef huart1;
 #define I2C_PORT         GPIOB
 #define SCL_PIN         GPIO_PIN_6
 #define SDA_PIN         GPIO_PIN_7
+
+/* MCP79410: independent GPIO software-I2C bus. */
+#define MCP_I2C_PORT GPIOB
+#define MCP_SCL_PIN GPIO_PIN_10
+#define MCP_SDA_PIN GPIO_PIN_11
 
 #define BUTTON_1_PORT   GPIOB
 #define BUTTON_1_PIN    GPIO_PIN_12
@@ -21,11 +25,8 @@ extern UART_HandleTypeDef huart1;
 
 #define LED_RED_PORT    GPIOB
 #define LED_RED_PIN     GPIO_PIN_15
-#define LED_GREEN_PORT  GPIOB
-#define LED_GREEN_PIN   GPIO_PIN_14
+#define BOARD_GREEN_LED_AVAILABLE 0 /* PB14 reserved for DIP4. */
 
-#define BUZZER_PORT     GPIOB
-#define BUZZER_PIN      GPIO_PIN_8
 /*
 #define RFID_CS_PORT    GPIOA
 #define RFID_CS_PIN     GPIO_PIN_4

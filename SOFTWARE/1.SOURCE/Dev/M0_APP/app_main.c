@@ -35,7 +35,7 @@ static void idle(void) {
     clear_pass(); memset(&pending_card,0,sizeof(pending_card)); memset(&user,0,sizeof(user));
     selected=-1; scan_time=0; action=ACTION_REGISTER;
     if(!App_System_Ready()) {
-        UI_ShowMessage("Loi EEPROM MCP",App_System_ErrorText()); enter(STATE_STORAGE_ERROR);
+        UI_ShowMessage("MCP GPIO PB10/11",App_System_ErrorText()); enter(STATE_STORAGE_ERROR);
     } else { UI_ShowMessage("Cho quet the","*:Menu admin"); enter(STATE_IDLE); }
 }
 static void result(const char *a,const char *b,uint32_t ms) {

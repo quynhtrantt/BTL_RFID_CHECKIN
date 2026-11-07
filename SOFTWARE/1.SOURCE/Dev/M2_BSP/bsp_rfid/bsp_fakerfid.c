@@ -22,8 +22,8 @@ typedef struct {
 static const id_fake dipswitch[8]={
 		{GPIOB, GPIO_PIN_0},
 		{GPIOB, GPIO_PIN_2},
-		{GPIOB, GPIO_PIN_10},
-		{GPIOB, GPIO_PIN_11},
+		{GPIOB, GPIO_PIN_8},
+		{GPIOB, GPIO_PIN_14},
 		{GPIOA, GPIO_PIN_8},
 		{GPIOA, GPIO_PIN_11},
 		{GPIOA, GPIO_PIN_12},

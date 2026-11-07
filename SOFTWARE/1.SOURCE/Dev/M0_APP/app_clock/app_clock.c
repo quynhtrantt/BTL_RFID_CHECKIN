@@ -1,5 +1,5 @@
 #include "app_clock.h"
-#include "../../M3_DRIVER/DEVICES/driver_mcp/driver_mcp79410.h"
+#include "driver_mcp79410.h"
 #include "stm32f1xx_hal.h"
 #include <stdio.h>
 #include <string.h>
