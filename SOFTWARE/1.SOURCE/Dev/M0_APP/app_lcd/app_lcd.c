@@ -32,7 +32,7 @@ void UI_ShowIdle(void)
 void UI_ShowChecking(RFID_UID_t *card)
 {
     char buf[16];
-    sprintf(buf, "UID:%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3]);
+    sprintf(buf, "UID:%02X%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3], card->uid[4]);
     UI_ShowMessage("Dang kiem tra...", buf);
 }
 
@@ -58,6 +58,6 @@ void UI_ShowPasswordPrompt(const char* stars)
 void UI_ShowManageCard(RFID_UID_t *card)
 {
     char buf[16];
-    sprintf(buf, "UID:%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3]);
+    sprintf(buf, "UID:%02X%02X%02X%02X%02X", card->uid[0], card->uid[1], card->uid[2], card->uid[3],card->uid[4]);
     UI_ShowMessage(buf, "NUT:D.Danh #:Xoa");
 }

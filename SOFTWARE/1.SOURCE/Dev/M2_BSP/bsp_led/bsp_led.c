@@ -8,5 +8,9 @@ void BSP_LED_Red_Set(bool state)
 }
 void BSP_LED_Green_Set(bool state)
 {
-	Driver_GPIO_Write(LED_GREEN_PORT, LED_GREEN_PIN, state);
+	#if BOARD_GREEN_LED_AVAILABLE
+    Driver_GPIO_Write(LED_GREEN_PORT, LED_GREEN_PIN, state);
+#else
+    (void)state; /* Pin belongs to DIP4 in this board configuration. */
+#endif
 }

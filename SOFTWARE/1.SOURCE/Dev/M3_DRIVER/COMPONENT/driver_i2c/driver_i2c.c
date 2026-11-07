@@ -8,6 +8,7 @@
 
 static bool ready = false;
 
+
 static void HalfBit(void)
 {
     for (volatile uint32_t i = 0; i < HALF_BIT_LOOPS; i++)
@@ -37,10 +38,9 @@ static void Bus_Init(void)
 {
     GPIO_InitTypeDef pin = {0};
 
-    if (ready)
-        return;
-
+    if (ready) return;
     __HAL_RCC_GPIOB_CLK_ENABLE();
+    HAL_GPIO_WritePin(I2C_PORT, SCL_PIN | SDA_PIN, GPIO_PIN_SET);
 
     pin.Pin = SCL_PIN | SDA_PIN;
     pin.Mode = GPIO_MODE_OUTPUT_OD;
@@ -51,11 +51,9 @@ static void Bus_Init(void)
 
     SCL(true);
     SDA(true);
-
     ready = true;
 }
 
-/* Tha SCL len muc cao */
 static bool SCL_Release(void)
 {
     SCL(true);
@@ -72,7 +70,6 @@ static bool SCL_Release(void)
     return true;
 }
 
-/* START condition */
 static bool Start(void)
 {
     SDA(true);
@@ -89,7 +86,6 @@ static bool Start(void)
     return true;
 }
 
-/* STOP condition */
 static bool Stop(void)
 {
     SDA(false);
@@ -104,7 +100,6 @@ static bool Stop(void)
     return true;
 }
 
-/* Ghi 1 byte, kiem tra ACK */
 static bool WriteByte(uint8_t value)
 {
     for (uint8_t mask = 0x80U; mask != 0U; mask >>= 1)
@@ -121,7 +116,6 @@ static bool WriteByte(uint8_t value)
         SCL(false);
     }
 
-    /* Tha SDA de slave phan hoi ACK */
     SDA(true);
     HalfBit();
 
@@ -139,8 +133,7 @@ static bool WriteByte(uint8_t value)
     return ack;
 }
 
-/* Doc 1 byte */
-static uint8_t ReadByte(bool ack)
+static bool ReadByte(bool ack, uint8_t *out)
 {
     uint8_t value = 0U;
 
@@ -153,7 +146,7 @@ static uint8_t ReadByte(bool ack)
         if (!SCL_Release())
         {
             SCL(false);
-            return value;
+            return false;
         }
 
         value <<= 1;
@@ -164,20 +157,17 @@ static uint8_t ReadByte(bool ack)
         SCL(false);
     }
 
-    /* ACK keo SDA xuong, NACK tha SDA */
     SDA(!ack);
     HalfBit();
 
-    (void)SCL_Release();
+    if (!SCL_Release()) { SCL(false); SDA(true); return false; }
     SCL(false);
-
     SDA(true);
     HalfBit();
-
-    return value;
+    *out=value;
+    return true;
 }
 
-/* Ghi nhieu byte */
 static bool WriteBytes(const uint8_t *data, uint16_t len)
 {
     for (uint16_t i = 0; i < len; i++)
@@ -189,7 +179,6 @@ static bool WriteBytes(const uint8_t *data, uint16_t len)
     return true;
 }
 
-/* Ghi du lieu */
 bool Driver_I2C_Write(uint8_t dev_addr,
                       uint8_t *data,
                       uint16_t len)
@@ -202,18 +191,16 @@ bool Driver_I2C_Write(uint8_t dev_addr,
     if (!Start())
         return false;
 
-    /* dev_addr la dia chi 7 bit */
     bool ok = WriteByte((uint8_t)(dev_addr << 1));
 
     if (ok)
         ok = WriteBytes(data, len);
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }
 
-/* Ghi thanh ghi 8 bit */
 bool Driver_I2C_Mem_Write(uint8_t dev_addr,
                           uint16_t reg_addr,
                           uint8_t *data,
@@ -235,55 +222,41 @@ bool Driver_I2C_Mem_Write(uint8_t dev_addr,
     if (ok)
         ok = WriteBytes(data, len);
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }
 
-/* Doc thanh ghi 8 bit */
-bool Driver_I2C_Mem_Read(uint8_t dev_addr,
-                         uint16_t reg_addr,
-                         uint8_t *data,
-                         uint16_t len)
+static const char *read_stage="OK";
+const char *Driver_I2C_ReadStage(void) { return read_stage; }
+bool Driver_I2C_Mem_Read(uint8_t dev_addr, uint16_t reg_addr,
+                         uint8_t *data, uint16_t len)
 {
-    if (data == NULL || len == 0U)
-        return false;
-
+    read_stage="ARG";
+    if (!data || !len) return false;
     Bus_Init();
-
-    if (!Start())
-        return false;
-
-    bool ok = WriteByte((uint8_t)(dev_addr << 1));
-
-    if (ok)
-        ok = WriteByte((uint8_t)reg_addr);
-
-    if (ok)
-    {
-        /* Repeated START */
-        ok = Start();
-
-        if (ok)
-        {
-            ok = WriteByte((uint8_t)((dev_addr << 1) | 0x01U));
-        }
+    read_stage="START";
+    if (!Start()) return false;
+    bool ok=false;
+    read_stage="AW";
+    if (!WriteByte((uint8_t)(dev_addr<<1))) goto finish;
+    read_stage="REG";
+    if (!WriteByte((uint8_t)reg_addr)) goto finish;
+    read_stage="RESTART";
+    if (!Start()) goto finish;
+    read_stage="AR";
+    if (!WriteByte((uint8_t)((dev_addr<<1)|1U))) goto finish;
+    read_stage="DATA";
+    for(uint16_t i=0;i<len;i++) {
+        if(!ReadByte(i+1U<len,&data[i])) goto finish;
     }
-
-    if (ok)
-    {
-        for (uint16_t i = 0; i < len; i++)
-        {
-            data[i] = ReadByte(i + 1U < len);
-        }
-    }
-
-    (void)Stop();
-
+    ok=true;
+finish:
+    if(!Stop()) { if(ok) read_stage="STOP"; return false; }
+    if(ok) read_stage="OK";
     return ok;
 }
-
-/* Kiem tra thiet bi co ACK khong */
+//chekc ACK
 bool Driver_I2C_IsReady(uint8_t dev_addr)
 {
     Bus_Init();
@@ -293,7 +266,8 @@ bool Driver_I2C_IsReady(uint8_t dev_addr)
 
     bool ok = WriteByte((uint8_t)(dev_addr << 1));
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }
+

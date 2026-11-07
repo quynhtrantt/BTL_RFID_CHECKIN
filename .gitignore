@@ -18,3 +18,10 @@ desktop.ini
 
 # (LƯU Ý: Không bỏ qua các file .project, .cproject, .settings/ và .ioc 
 # vì đây là các file cấu hình khung project bắt buộc để người khác có thể mở được)
+# Local test compiler downloads; never commit.
+/.test-tools/
+
+# Local test tools, temporary IDE workspace and generated notes.
+/.build-check-workspace/
+/SOFTWARE/tests/
+/SOFTWARE/ATTENDANCE_FLOW.md
