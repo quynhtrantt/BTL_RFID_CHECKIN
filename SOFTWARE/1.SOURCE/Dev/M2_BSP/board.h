@@ -15,6 +15,10 @@ extern UART_HandleTypeDef huart1;
 #define BUTTON_1_PORT   GPIOB
 #define BUTTON_1_PIN    GPIO_PIN_12
 
+/* BT2: separate button to GND; PB13 remains the fake-card trigger. */
+#define BUTTON_2_PORT   GPIOB
+#define BUTTON_2_PIN    GPIO_PIN_9
+
 #define LED_RED_PORT    GPIOB
 #define LED_RED_PIN     GPIO_PIN_15
 #define LED_GREEN_PORT  GPIOB

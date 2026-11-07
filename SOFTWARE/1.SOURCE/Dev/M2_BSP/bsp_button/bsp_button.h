@@ -1,8 +1,7 @@
-#ifndef M2_BSP_BSP_BUTTON_BSP_BUTTON_H_
-#define M2_BSP_BSP_BUTTON_BSP_BUTTON_H_
-
+#ifndef BSP_BUTTON_H
+#define BSP_BUTTON_H
 #include <stdbool.h>
-
+void BSP_Button_Init(void);
 bool BSP_Button_IsPressed(void);
-
-#endif /* M2_BSP_BSP_BUTTON_BSP_BUTTON_H_ */
+bool BSP_Button2_IsPressed(void);
+#endif

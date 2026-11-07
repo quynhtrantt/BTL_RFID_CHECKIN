@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "driver_rfid.h"
 
-#define MAX_CARDS 50
+#define MAX_CARDS 8
 
 void App_RFID_InitDB(void);
 bool App_RFID_HasNewCard(RFID_UID_t *out_card);

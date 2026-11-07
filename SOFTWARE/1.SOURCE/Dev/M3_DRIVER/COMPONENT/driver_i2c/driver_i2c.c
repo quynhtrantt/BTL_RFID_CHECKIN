@@ -134,7 +134,7 @@ static bool WriteByte(uint8_t value)
     return ack;
 }
 
-static uint8_t ReadByte(bool ack)
+static bool ReadByte(bool ack, uint8_t *out)
 {
     uint8_t value = 0U;
 
@@ -147,7 +147,7 @@ static uint8_t ReadByte(bool ack)
         if (!SCL_Release())
         {
             SCL(false);
-            return value;
+            return false;
         }
 
         value <<= 1;
@@ -161,13 +161,12 @@ static uint8_t ReadByte(bool ack)
     SDA(!ack);
     HalfBit();
 
-    (void)SCL_Release();
+    if (!SCL_Release()) { SCL(false); SDA(true); return false; }
     SCL(false);
-
     SDA(true);
     HalfBit();
-
-    return value;
+    *out=value;
+    return true;
 }
 
 static bool WriteBytes(const uint8_t *data, uint16_t len)
@@ -198,9 +197,9 @@ bool Driver_I2C_Write(uint8_t dev_addr,
     if (ok)
         ok = WriteBytes(data, len);
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }
 
 bool Driver_I2C_Mem_Write(uint8_t dev_addr,
@@ -224,50 +223,38 @@ bool Driver_I2C_Mem_Write(uint8_t dev_addr,
     if (ok)
         ok = WriteBytes(data, len);
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }
 
-bool Driver_I2C_Mem_Read(uint8_t dev_addr,
-                         uint16_t reg_addr,
-                         uint8_t *data,
-                         uint16_t len)
+static const char *read_stage="OK";
+const char *Driver_I2C_ReadStage(void) { return read_stage; }
+bool Driver_I2C_Mem_Read(uint8_t dev_addr, uint16_t reg_addr,
+                         uint8_t *data, uint16_t len)
 {
-    if (data == NULL || len == 0U)
-        return false;
-
+    read_stage="ARG";
+    if (!data || !len) return false;
     Bus_Init();
-
-    if (!Start())
-        return false;
-
-    bool ok = WriteByte((uint8_t)(dev_addr << 1));
-
-    if (ok)
-        ok = WriteByte((uint8_t)reg_addr);
-
-    if (ok)
-    {
-
-        ok = Start();
-
-        if (ok)
-        {
-            ok = WriteByte((uint8_t)((dev_addr << 1) | 0x01U));
-        }
+    read_stage="START";
+    if (!Start()) return false;
+    bool ok=false;
+    read_stage="AW";
+    if (!WriteByte((uint8_t)(dev_addr<<1))) goto finish;
+    read_stage="REG";
+    if (!WriteByte((uint8_t)reg_addr)) goto finish;
+    read_stage="RESTART";
+    if (!Start()) goto finish;
+    read_stage="AR";
+    if (!WriteByte((uint8_t)((dev_addr<<1)|1U))) goto finish;
+    read_stage="DATA";
+    for(uint16_t i=0;i<len;i++) {
+        if(!ReadByte(i+1U<len,&data[i])) goto finish;
     }
-
-    if (ok)
-    {
-        for (uint16_t i = 0; i < len; i++)
-        {
-            data[i] = ReadByte(i + 1U < len);
-        }
-    }
-
-    (void)Stop();
-
+    ok=true;
+finish:
+    if(!Stop()) { if(ok) read_stage="STOP"; return false; }
+    if(ok) read_stage="OK";
     return ok;
 }
 //chekc ACK
@@ -280,7 +267,7 @@ bool Driver_I2C_IsReady(uint8_t dev_addr)
 
     bool ok = WriteByte((uint8_t)(dev_addr << 1));
 
-    (void)Stop();
+    bool stopped=Stop();
 
-    return ok;
+    return ok && stopped;
 }

@@ -1,20 +1,15 @@
 #include "app_keypad.h"
 #include "bsp_keypad.h"
 #include "stm32f1xx_hal.h"
-
 char App_Keypad_GetKey(void) {
-    static uint32_t last_press_time = 0;
-    static char last_key = '\0';
-    char current_key = BSP_Keypad_Scan();
-
-    if (current_key != '\0' && current_key != last_key) {
-        if (HAL_GetTick() - last_press_time > 50) {
-            last_key = current_key;
-            last_press_time = HAL_GetTick();
-            return current_key;
-        }
-    } else if (current_key == '\0') {
-        last_key = '\0';
+    static char raw, stable;
+    static uint32_t changed;
+    char key=BSP_Keypad_Scan();
+    uint32_t now=HAL_GetTick();
+    if(key!=raw) { raw=key; changed=now; }
+    if((uint32_t)(now-changed)>=30 && stable!=raw) {
+        stable=raw;
+        return stable;
     }
-    return '\0'; //=255
+    return '\0';
 }

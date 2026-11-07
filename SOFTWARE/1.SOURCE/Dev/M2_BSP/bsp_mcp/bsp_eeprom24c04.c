@@ -2,7 +2,7 @@
 #include "board.h"
 #include "driver_gpio.h"
 
-#include "../../M3_DRIVER/DEVICES/driver_mcp/driver_eeprom24c04.h"
+#include "driver_eeprom24c04.h"
 
 #define EEPROM_ADDR 0xA0
 
