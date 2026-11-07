@@ -10,7 +10,8 @@
 
 typedef enum {
     STATE_IDLE, STATE_CHECKING, STATE_UNREGISTERED,
-    STATE_SPECIAL_MENU, STATE_ENTER_PASS, STATE_MANAGE
+    STATE_SPECIAL_MENU, STATE_ENTER_PASS, STATE_MANAGE,
+    STATE_REGISTER_PASS
 } AppState_t;
 
 static AppState_t current_state = STATE_IDLE;
@@ -59,13 +60,60 @@ static void State_Handle_Checking(void) {
 
 static void State_Handle_Unregistered(void) {
     if (App_Button_IsPressed()) {
-        if (App_RFID_AddCard(&current_card)) UI_ShowMessage("Dang ky thanh cong!", NULL);
-        else UI_ShowMessage("Bo nho day!", NULL);
+        memset(input_pass, 0, sizeof(input_pass));
+        pass_idx = 0;
+        UI_ShowPasswordPrompt("");
+        State_Switch(STATE_REGISTER_PASS);
+        return;
+    }
+    if (Timeout_Check(5000)) { UI_ShowIdle(); State_Switch(STATE_IDLE); }
+}
+
+static void State_Handle_RegisterPass(void) {
+    /* Expire before accepting a late confirmation. */
+    if (Timeout_Check(10000)) {
+        memset(input_pass, 0, sizeof(input_pass));
+        pass_idx = 0;
+        UI_ShowIdle();
+        State_Switch(STATE_IDLE);
+        return;
+    }
+
+    char key = App_Keypad_GetKey();
+    if (key == '\0') return;
+    state_timer = HAL_GetTick();
+
+    if (key == '#') {
+        if (strcmp(input_pass, master_pass) == 0) {
+            if (App_RFID_AddCard(&current_card)) {
+                current_card_index = App_RFID_FindCard(&current_card);
+                UI_ShowMessage("Dang ky thanh", "cong!");
+            } else {
+                UI_ShowMessage("Bo nho day!", NULL);
+            }
+        } else {
+            UI_ShowMessage("Sai Pass!", "Khong luu the");
+        }
+        memset(input_pass, 0, sizeof(input_pass));
+        pass_idx = 0;
         HAL_Delay(2000);
         UI_ShowIdle();
         State_Switch(STATE_IDLE);
+        return;
     }
-    if (Timeout_Check(5000)) { UI_ShowIdle(); State_Switch(STATE_IDLE); }
+
+    if (key == '*') {
+        memset(input_pass, 0, sizeof(input_pass));
+        pass_idx = 0;
+    } else if (key >= '0' && key <= '9' &&
+               pass_idx < sizeof(input_pass) - 1) {
+        input_pass[pass_idx++] = key;
+        input_pass[pass_idx] = '\0';
+    }
+
+    char stars[sizeof(input_pass)] = {0};
+    memset(stars, '*', pass_idx);
+    UI_ShowPasswordPrompt(stars);
 }
 
 static void State_Handle_SpecialMenu(void) {
@@ -148,6 +196,9 @@ void App_Task(void) {
         case STATE_UNREGISTERED:
         	State_Handle_Unregistered();
         	break;
+        case STATE_REGISTER_PASS:
+            State_Handle_RegisterPass();
+            break;
         case STATE_SPECIAL_MENU:
         	State_Handle_SpecialMenu();
         	break;

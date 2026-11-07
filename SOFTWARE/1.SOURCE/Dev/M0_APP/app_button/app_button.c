@@ -44,7 +44,7 @@ bool App_Button_IsPressed(void) {
 
 bool App_Button_IsHeld(uint32_t hold_time_ms) {
     if (is_holding && (HAL_GetTick() - press_start_time >= hold_time_ms)) {
-        is_holding = false; // Chỉ trả về true 1 lần
+        is_holding = false; //back true 1 lan
         return true;
     }
     return false;

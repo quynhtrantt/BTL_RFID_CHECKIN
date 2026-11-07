@@ -1,38 +1,17 @@
-/*
- * test_pcf.c
- *
- *  Created on: Nov 3, 2026
- *      Author: Quynh
- */
-
-#include "driver_pcf8574.h"
-#include "driver_lcd.h"
-#include "bsp_lcd.h"
-#include "test_lcd.h"
-#include "bsp_led.h"
-#include "app_lcd.h"
-#include <stdbool.h>
+#include "app_system.h"
+#include "app_main.h"
+#include "bsp_keypad.h"
+#include "bsp_button.h"
 #include "board.h"
-#include "stm32f1xx_hal.h"
+#include "driver_gpio.h"
+#include "bsp_button.h"
 
 void app_main(void)
 {
-
-	//BSP_LED_Red_Set(0);
-	App_LCD_Init();
-	Fake_RFID_Init();
-	//Driver_PCF8574_Init(MODULE_I2C_ADDR);
-	//Driver_PCF8574_WritePort(3);
-	//BSP_LCD_Init();
-	UI_ShowIdle();
-	RFID_UID_t card;
-	while (1)
-	{
-		if (Fake_RFID_ReadCard(&card) == true)
-		 {
-			UI_ShowChecking(&card);
-
-			UI_ShowIdle();
-		  }
-	}
+	BSP_Button_Init();
+    BSP_Keypad_Init();
+    App_Init();
+    while (1) {
+        App_Task();
+    }
 }

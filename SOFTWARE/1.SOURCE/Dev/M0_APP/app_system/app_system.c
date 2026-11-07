@@ -14,7 +14,7 @@ static CardDB_t database[MAX_CARDS];
 
 void App_System_InitDB(void)
 {
-    /* Preserve the three DIP IDs from the previous app_system database. */
+
     static const uint8_t initial_ids[] = {0x01, 0x05, 0x10};
     memset(database, 0, sizeof(database));
     for (unsigned int i = 0; i < sizeof(initial_ids); ++i) {
@@ -65,19 +65,3 @@ bool App_System_VerifyCard(RFID_UID_t *card)
     return App_System_FindCard(card) >= 0;
 }
 
-/* Hardware setup stays outside the existing state machine. */
-void app_main(void)
-{
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    GPIO_InitTypeDef gpio = {0};
-    gpio.Pin = BUTTON_1_PIN;
-    gpio.Mode = GPIO_MODE_INPUT;
-    gpio.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(BUTTON_1_PORT, &gpio);
-    BSP_Keypad_Init();
-
-    App_Init();
-    while (1) {
-        App_Task();
-    }
-}
