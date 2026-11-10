@@ -4,4 +4,4 @@
 #include <stdint.h>
 uint8_t Driver_SPI_TxRx(uint8_t data);
 
-#endif /* M3_DRIVER_COMPONENT_DRIVER_SPI_DRIVER_SPI_H_ */
+#endif

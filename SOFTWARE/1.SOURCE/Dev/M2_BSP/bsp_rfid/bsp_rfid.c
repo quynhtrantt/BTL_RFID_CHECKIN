@@ -34,7 +34,8 @@ void BSP_RFID_ArmInterrupt(void) {
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    if (GPIO_Pin == RFID_IRQ_PIN) {
+    if (GPIO_Pin == RFID_IRQ_PIN)
+    {
         flag_RFID_Scanned = true;
     }
 }

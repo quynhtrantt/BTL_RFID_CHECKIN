@@ -3,42 +3,34 @@
 #include "stdbool.h"
 #include <stddef.h>
 
-#define HALF_BIT_LOOPS   60U
-#define STRETCH_LOOPS    2000U
+#define HALF_BIT_LOOPS 60U
+#define STRETCH_LOOPS 2000U
 
 static bool ready = false;
 
-
-static void HalfBit(void)
-{
+static void HalfBit(void) {
     for (volatile uint32_t i = 0; i < HALF_BIT_LOOPS; i++)
     {
     }
 }
 
-static void SCL(bool high)
-{
-    HAL_GPIO_WritePin(I2C_PORT, SCL_PIN,
-                      high ? GPIO_PIN_SET : GPIO_PIN_RESET);
+static void SCL(bool high) {
+    HAL_GPIO_WritePin(I2C_PORT, SCL_PIN, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
-static void SDA(bool high)
-{
-    HAL_GPIO_WritePin(I2C_PORT, SDA_PIN,
-                      high ? GPIO_PIN_SET : GPIO_PIN_RESET);
+static void SDA(bool high) {
+    HAL_GPIO_WritePin(I2C_PORT, SDA_PIN, high ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
-static bool SDA_Read(void)
-{
+static bool SDA_Read(void) {
     return HAL_GPIO_ReadPin(I2C_PORT, SDA_PIN) == GPIO_PIN_SET;
 }
 
-/* Khoi tao Software I2C */
-static void Bus_Init(void)
-{
+static void Bus_Init(void) {
     GPIO_InitTypeDef pin = {0};
 
-    if (ready) return;
+    if (ready)
+        return;
     __HAL_RCC_GPIOB_CLK_ENABLE();
     HAL_GPIO_WritePin(I2C_PORT, SCL_PIN | SDA_PIN, GPIO_PIN_SET);
 
@@ -54,8 +46,7 @@ static void Bus_Init(void)
     ready = true;
 }
 
-static bool SCL_Release(void)
-{
+static bool SCL_Release(void) {
     SCL(true);
 
     uint32_t timeout = 0;
@@ -70,8 +61,7 @@ static bool SCL_Release(void)
     return true;
 }
 
-static bool Start(void)
-{
+static bool Start(void) {
     SDA(true);
 
     if (!SCL_Release())
@@ -86,8 +76,7 @@ static bool Start(void)
     return true;
 }
 
-static bool Stop(void)
-{
+static bool Stop(void) {
     SDA(false);
     HalfBit();
 
@@ -100,8 +89,7 @@ static bool Stop(void)
     return true;
 }
 
-static bool WriteByte(uint8_t value)
-{
+static bool WriteByte(uint8_t value) {
     for (uint8_t mask = 0x80U; mask != 0U; mask >>= 1)
     {
         SDA((value & mask) != 0U);
@@ -133,8 +121,7 @@ static bool WriteByte(uint8_t value)
     return ack;
 }
 
-static bool ReadByte(bool ack, uint8_t *out)
-{
+static bool ReadByte(bool ack, uint8_t *out) {
     uint8_t value = 0U;
 
     SDA(true);
@@ -160,16 +147,20 @@ static bool ReadByte(bool ack, uint8_t *out)
     SDA(!ack);
     HalfBit();
 
-    if (!SCL_Release()) { SCL(false); SDA(true); return false; }
+    if (!SCL_Release())
+    {
+        SCL(false);
+        SDA(true);
+        return false;
+    }
     SCL(false);
     SDA(true);
     HalfBit();
-    *out=value;
+    *out = value;
     return true;
 }
 
-static bool WriteBytes(const uint8_t *data, uint16_t len)
-{
+static bool WriteBytes(const uint8_t *data, uint16_t len) {
     for (uint16_t i = 0; i < len; i++)
     {
         if (!WriteByte(data[i]))
@@ -179,10 +170,7 @@ static bool WriteBytes(const uint8_t *data, uint16_t len)
     return true;
 }
 
-bool Driver_I2C_Write(uint8_t dev_addr,
-                      uint8_t *data,
-                      uint16_t len)
-{
+bool Driver_I2C_Write(uint8_t dev_addr, uint8_t *data, uint16_t len) {
     if (data == NULL || len == 0U)
         return false;
 
@@ -196,16 +184,12 @@ bool Driver_I2C_Write(uint8_t dev_addr,
     if (ok)
         ok = WriteBytes(data, len);
 
-    bool stopped=Stop();
+    bool stopped = Stop();
 
     return ok && stopped;
 }
 
-bool Driver_I2C_Mem_Write(uint8_t dev_addr,
-                          uint16_t reg_addr,
-                          uint8_t *data,
-                          uint16_t len)
-{
+bool Driver_I2C_Mem_Write(uint8_t dev_addr, uint16_t reg_addr, uint8_t *data, uint16_t len) {
     if (data == NULL || len == 0U)
         return false;
 
@@ -222,43 +206,58 @@ bool Driver_I2C_Mem_Write(uint8_t dev_addr,
     if (ok)
         ok = WriteBytes(data, len);
 
-    bool stopped=Stop();
+    bool stopped = Stop();
 
     return ok && stopped;
 }
 
-static const char *read_stage="OK";
-const char *Driver_I2C_ReadStage(void) { return read_stage; }
-bool Driver_I2C_Mem_Read(uint8_t dev_addr, uint16_t reg_addr,
-                         uint8_t *data, uint16_t len)
-{
-    read_stage="ARG";
-    if (!data || !len) return false;
+static const char *read_stage = "OK";
+
+const char *Driver_I2C_ReadStage(void) {
+    return read_stage;
+}
+
+bool Driver_I2C_Mem_Read(uint8_t dev_addr, uint16_t reg_addr, uint8_t *data, uint16_t len) {
+    read_stage = "ARG";
+    if (!data || !len)
+        return false;
     Bus_Init();
-    read_stage="START";
-    if (!Start()) return false;
-    bool ok=false;
-    read_stage="AW";
-    if (!WriteByte((uint8_t)(dev_addr<<1))) goto finish;
-    read_stage="REG";
-    if (!WriteByte((uint8_t)reg_addr)) goto finish;
-    read_stage="RESTART";
-    if (!Start()) goto finish;
-    read_stage="AR";
-    if (!WriteByte((uint8_t)((dev_addr<<1)|1U))) goto finish;
-    read_stage="DATA";
-    for(uint16_t i=0;i<len;i++) {
-        if(!ReadByte(i+1U<len,&data[i])) goto finish;
+    read_stage = "START";
+    if (!Start())
+        return false;
+    bool ok = false;
+    read_stage = "AW";
+    if (!WriteByte((uint8_t)(dev_addr << 1)))
+        goto finish;
+    read_stage = "REG";
+    if (!WriteByte((uint8_t)reg_addr))
+        goto finish;
+    read_stage = "RESTART";
+    if (!Start())
+        goto finish;
+    read_stage = "AR";
+    if (!WriteByte((uint8_t)((dev_addr << 1) | 1U)))
+        goto finish;
+    read_stage = "DATA";
+    for (uint16_t i = 0; i < len; i++)
+    {
+        if (!ReadByte(i + 1U < len, &data[i]))
+            goto finish;
     }
-    ok=true;
+    ok = true;
 finish:
-    if(!Stop()) { if(ok) read_stage="STOP"; return false; }
-    if(ok) read_stage="OK";
+    if (!Stop())
+    {
+        if (ok)
+            read_stage = "STOP";
+        return false;
+    }
+    if (ok)
+        read_stage = "OK";
     return ok;
 }
-//chekc ACK
-bool Driver_I2C_IsReady(uint8_t dev_addr)
-{
+
+bool Driver_I2C_IsReady(uint8_t dev_addr) {
     Bus_Init();
 
     if (!Start())
@@ -266,8 +265,7 @@ bool Driver_I2C_IsReady(uint8_t dev_addr)
 
     bool ok = WriteByte((uint8_t)(dev_addr << 1));
 
-    bool stopped=Stop();
+    bool stopped = Stop();
 
     return ok && stopped;
 }
-

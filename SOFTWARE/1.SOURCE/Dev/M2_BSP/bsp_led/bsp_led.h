@@ -6,4 +6,4 @@
 void BSP_LED_Red_Set(bool state);
 void BSP_LED_Green_Set(bool state);
 
-#endif /* M2_BSP_BSP_LED_BSP_LED_H_ */
+#endif
