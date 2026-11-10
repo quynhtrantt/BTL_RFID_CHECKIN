@@ -12,4 +12,4 @@ int App_RFID_FindCard(RFID_UID_t *card);
 bool App_RFID_AddCard(RFID_UID_t *card);
 void App_RFID_DeleteCard(int index);
 
-#endif /* M0_APP_APP_RFID_APP_RFID_H_ */
+#endif

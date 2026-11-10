@@ -3,4 +3,4 @@
 
 char App_Keypad_GetKey(void);
 
-#endif /* M0_APP_APP_KEYPAD_APP_KEYPAD_H_ */
+#endif

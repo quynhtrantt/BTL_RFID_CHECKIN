@@ -11,21 +11,19 @@ typedef struct {
 } CardDB_t;
 
 static CardDB_t database[MAX_CARDS] = {
-    { .uid = {0x01, 0x02, 0x03, 0x04, 0x05}, .valid = 1 }, // Card 0
-    { .uid = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE}, .valid = 1 }, // Card 1
-    // Remaining cards up to MAX_CARDS automatically initialize to all zeros
+    {.uid = {0x01, 0x02, 0x03, 0x04, 0x05}, .valid = 1},
+    {.uid = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE}, .valid = 1},
+
 };
 
-//la =50 the
-
 void App_RFID_InitDB(void) {
-    for (int i = 0; i < MAX_CARDS; i++) database[i].valid = 0;
+    for (int i = 0; i < MAX_CARDS; i++)
+        database[i].valid = 0;
 }
+
 uint8_t hardcode_uid_1[5] = {0x12, 0x34, 0x56, 0x78, 0x90};
 
-
-bool App_RFID_HasNewCard(RFID_UID_t *out_card)
-{
+bool App_RFID_HasNewCard(RFID_UID_t *out_card) {
     if (flag_RFID_Scanned)
     {
         bool status = BSP_RFID_ReadCard(out_card);
@@ -36,7 +34,7 @@ bool App_RFID_HasNewCard(RFID_UID_t *out_card)
 
         if (status)
         {
-            //BSP_BuzzerStart();
+
             return true;
         }
     }
@@ -44,15 +42,19 @@ bool App_RFID_HasNewCard(RFID_UID_t *out_card)
 }
 
 int App_RFID_FindCard(RFID_UID_t *card) {
-    for (int i = 0; i < MAX_CARDS; i++) {
-        if (database[i].valid == 1 && memcmp(database[i].uid, card->uid, card->size) == 0) return i;
+    for (int i = 0; i < MAX_CARDS; i++)
+    {
+        if (database[i].valid == 1 && memcmp(database[i].uid, card->uid, card->size) == 0)
+            return i;
     }
     return -1;
 }
 
 bool App_RFID_AddCard(RFID_UID_t *card) {
-    for (int i = 0; i < MAX_CARDS; i++) {
-        if (database[i].valid == 0) {
+    for (int i = 0; i < MAX_CARDS; i++)
+    {
+        if (database[i].valid == 0)
+        {
             memcpy(database[i].uid, card->uid, card->size);
             database[i].valid = 1;
             return true;
@@ -62,5 +64,6 @@ bool App_RFID_AddCard(RFID_UID_t *card) {
 }
 
 void App_RFID_DeleteCard(int index) {
-    if (index >= 0 && index < MAX_CARDS) database[index].valid = 0;
+    if (index >= 0 && index < MAX_CARDS)
+        database[index].valid = 0;
 }

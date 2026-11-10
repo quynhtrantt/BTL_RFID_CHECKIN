@@ -19,4 +19,4 @@ void Driver_RFID_ArmInterrupt(void);
 void Driver_RFID_ClearInterrupt(void);
 bool Driver_RFID_ReadCard(RFID_UID_t *uid);
 
-#endif /* M3_DRIVER_DEVICES_DRIVER_RFID_DRIVER_RFID_H_ */
+#endif

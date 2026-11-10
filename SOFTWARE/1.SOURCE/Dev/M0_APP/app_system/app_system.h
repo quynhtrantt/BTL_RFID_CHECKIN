@@ -5,8 +5,18 @@
 #define APP_LOG_COUNT 2
 #define APP_NAME_SIZE 12
 #define APP_PASS_LENGTH 6
-typedef struct { RFID_UID_t card; char name[APP_NAME_SIZE]; } AppUser_t;
-typedef struct { uint8_t uid[5]; char name[APP_NAME_SIZE]; uint32_t time, sequence; } AppLog_t;
+
+typedef struct {
+    RFID_UID_t card;
+    char name[APP_NAME_SIZE];
+} AppUser_t;
+
+typedef struct {
+    uint8_t uid[5];
+    char name[APP_NAME_SIZE];
+    uint32_t time, sequence;
+} AppLog_t;
+
 void App_System_InitDB(void);
 bool App_System_Ready(void);
 const char *App_System_ErrorText(void);
