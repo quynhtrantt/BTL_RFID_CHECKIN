@@ -31,6 +31,15 @@ typedef enum {
     ACTION_PASSWORD
 } AdminAction_t;
 
+typedef struct {
+    bool bt1;
+    bool bt2;
+    char key;
+    bool new_card;
+    RFID_UID_t scanned;
+} AppInputs_t;
+
+static AppInputs_t inputs;
 static AppState_t state;
 static AdminAction_t action;
 static uint32_t timer, result_ms, scan_time;
@@ -129,197 +138,252 @@ void App_Init(void) {
     idle();
 }
 
-void App_Task(void) {
+static void read_inputs(void) {
     App_Button_Task();
-    bool bt1 = App_Button_IsPressed(), bt2 = App_Button2_IsPressed();
-    char key = App_Keypad_GetKey();
-    RFID_UID_t scanned;
+    inputs.bt1 = App_Button_IsPressed();
+    inputs.bt2 = App_Button2_IsPressed();
+    inputs.key = App_Keypad_GetKey();
+    inputs.new_card = App_RFID_HasNewCard(&inputs.scanned);
+}
 
-    bool new_card = App_RFID_HasNewCard(&scanned);
+static bool state_ready(void) {
     if (state != STATE_STORAGE_ERROR && !App_System_Ready())
     {
         idle();
-        return;
+        return false;
     }
     if (admin_state() && elapsed(5000))
     {
         idle();
+        return false;
+    }
+    return true;
+}
+
+static void State_StorageError(void) {
+
+    if (inputs.key == '#')
+    {
+        App_System_InitDB();
+        idle();
+    }
+}
+
+static void State_Idle(void) {
+    if (inputs.key == '*')
+    {
+        if (!App_System_Ready())
+        {
+            result("Loi EEPROM MCP", App_System_ErrorText(), 5000);
+            return;
+        }
+        UI_ShowMessage("BT1:Dang ky moi", "BT2:Xoa #:Pass");
+        enter(STATE_MENU);
+    }
+    else if (inputs.new_card && App_System_Ready() && inputs.scanned.size == 5)
+    {
+        pending_card = inputs.scanned;
+        UI_ShowMessage("Dang kiem tra...", NULL);
+        enter(STATE_CHECKING);
+    }
+}
+
+static void State_Checking(void) {
+    if (elapsed(300))
+    {
+        selected = App_System_FindCard(&pending_card);
+        if (selected < 0)
+        {
+            char line[17];
+            snprintf(line, sizeof(line), "UID:%02X%02X%02X%02X%02X", pending_card.uid[0],
+                     pending_card.uid[1], pending_card.uid[2], pending_card.uid[3], pending_card.uid[4]);
+            result("The chua dang ky", line, 3000);
+            return;
+        }
+        if (!App_System_GetUser(selected, &user))
+        {
+            idle();
+            return;
+        }
+        if (!App_Clock_Get(&scan_time))
+        {
+            result("Loi gio RTC", "Khong luu diem danh", 2000);
+            return;
+        }
+        show_user(&user);
+        enter(STATE_SHOW_USER);
+    }
+}
+
+static void State_ShowUser(void) {
+    if (elapsed(5000))
+    {
+        if (!App_System_LogAttendance(&user, scan_time))
+            result("Luu that bai", "Kiem tra EEPROM", 2000);
+        else
+        {
+            char line[17];
+            App_Clock_Format(scan_time, line);
+            result("Quet thanh cong", line, 5000);
+        }
+    }
+}
+
+static void State_Result(void) {
+    if (elapsed(result_ms))
+        idle();
+}
+
+static void State_Menu(void) {
+    if (inputs.bt1 || inputs.bt2 || inputs.key == '#')
+    {
+        action = inputs.bt1 ? ACTION_REGISTER : inputs.bt2 ? ACTION_DELETE : ACTION_PASSWORD;
+        auth(STATE_AUTH);
+    }
+}
+
+static void State_Auth(void) {
+    int done = password_key(inputs.key);
+    if (!done)
+        return;
+    if (done < 0 || !App_System_CheckPassword(password))
+    {
+        result("Sai mat khau", NULL, 1500);
         return;
     }
+    clear_pass();
+    if (action == ACTION_REGISTER)
+    {
+        UI_ShowMessage("Quet the moi", "PB13:Quet DIP");
+        enter(STATE_REGISTER_SCAN);
+    }
+    else if (action == ACTION_DELETE)
+    {
+        selected = App_System_NextUser(-1);
+        if (selected < 0 || !App_System_GetUser(selected, &user))
+            result("Khong co the", NULL, 1500);
+        else
+        {
+            show_user(&user);
+            enter(STATE_DELETE_SELECT);
+        }
+    }
+    else
+    {
+        UI_ShowMessage("Pass moi: 6 so", "# OK, * Xoa");
+        enter(STATE_NEW_PASSWORD);
+    }
+}
+
+static void State_RegisterScan(void) {
+    if (inputs.new_card && inputs.scanned.size == 5)
+    {
+        if (App_System_FindCard(&inputs.scanned) >= 0)
+        {
+            result("The da dang ky", NULL, 1500);
+            return;
+        }
+        pending_card = inputs.scanned;
+        AppUser_t preview = {0};
+        preview.card = pending_card;
+        show_user(&preview);
+        enter(STATE_REGISTER_CONFIRM);
+    }
+}
+
+static void State_RegisterConfirm(void) {
+    if (inputs.bt1)
+    {
+        if (App_System_AddCard(&pending_card))
+            result("Dang ky thanh", "cong!", 2000);
+        else
+            result("Khong them duoc", "Bo nho day/loi", 2000);
+    }
+}
+
+static void State_DeleteSelect(void) {
+    if (inputs.key == '*')
+        auth(STATE_DELETE_AUTH);
+    else if (inputs.bt2)
+    {
+        selected = App_System_NextUser(selected);
+        if (selected < 0 || !App_System_GetUser(selected, &user))
+            result("Khong co the", NULL, 1500);
+        else
+        {
+            show_user(&user);
+            timer = HAL_GetTick();
+        }
+    }
+}
+
+static void State_DeleteAuth(void) {
+    int done = password_key(inputs.key);
+    if (!done)
+        return;
+    if (done < 0 || !App_System_CheckPassword(password))
+        result("Sai mat khau", "Khong xoa the", 1500);
+    else if (App_System_DeleteUser(selected))
+        result("Xoa thanh cong", NULL, 2000);
+    else
+        result("Xoa that bai", "Kiem tra EEPROM", 2000);
+}
+
+static void State_NewPassword(void) {
+    int done = password_key(inputs.key);
+    if (!done)
+        return;
+    if (done < 0)
+        result("Pass can 6 so", "Chua doi pass", 1500);
+    else if (App_System_ChangePassword(password))
+        result("Doi pass thanh", "cong!", 2000);
+    else
+        result("Loi luu pass", "Hay khoi dong lai", 2000);
+}
+
+void App_Task(void) {
+    read_inputs();
+    if (!state_ready())
+        return;
+
     switch (state)
     {
     case STATE_STORAGE_ERROR:
-
-        if (key == '#')
-        {
-            App_System_InitDB();
-            idle();
-        }
+        State_StorageError();
         break;
     case STATE_IDLE:
-        if (key == '*')
-        {
-            if (!App_System_Ready())
-            {
-                result("Loi EEPROM MCP", App_System_ErrorText(), 5000);
-                break;
-            }
-            UI_ShowMessage("BT1:Dang ky moi", "BT2:Xoa #:Pass");
-            enter(STATE_MENU);
-        }
-        else if (new_card && App_System_Ready() && scanned.size == 5)
-        {
-            pending_card = scanned;
-            UI_ShowMessage("Dang kiem tra...", NULL);
-            enter(STATE_CHECKING);
-        }
+        State_Idle();
         break;
     case STATE_CHECKING:
-        if (elapsed(300))
-        {
-            selected = App_System_FindCard(&pending_card);
-            if (selected < 0)
-            {
-                char line[17];
-                snprintf(line, sizeof(line), "UID:%02X%02X%02X%02X%02X", pending_card.uid[0],
-                         pending_card.uid[1], pending_card.uid[2], pending_card.uid[3], pending_card.uid[4]);
-                result("The chua dang ky", line, 3000);
-                break;
-            }
-            if (!App_System_GetUser(selected, &user))
-            {
-                idle();
-                break;
-            }
-            if (!App_Clock_Get(&scan_time))
-            {
-                result("Loi gio RTC", "Khong luu diem danh", 2000);
-                break;
-            }
-            show_user(&user);
-            enter(STATE_SHOW_USER);
-        }
+        State_Checking();
         break;
     case STATE_SHOW_USER:
-        if (elapsed(5000))
-        {
-            if (!App_System_LogAttendance(&user, scan_time))
-                result("Luu that bai", "Kiem tra EEPROM", 2000);
-            else
-            {
-                char line[17];
-                App_Clock_Format(scan_time, line);
-                result("Quet thanh cong", line, 5000);
-            }
-        }
+        State_ShowUser();
         break;
     case STATE_RESULT:
-        if (elapsed(result_ms))
-            idle();
+        State_Result();
         break;
     case STATE_MENU:
-        if (bt1 || bt2 || key == '#')
-        {
-            action = bt1 ? ACTION_REGISTER : bt2 ? ACTION_DELETE : ACTION_PASSWORD;
-            auth(STATE_AUTH);
-        }
+        State_Menu();
         break;
-    case STATE_AUTH: {
-        int done = password_key(key);
-        if (!done)
-            break;
-        if (done < 0 || !App_System_CheckPassword(password))
-        {
-            result("Sai mat khau", NULL, 1500);
-            break;
-        }
-        clear_pass();
-        if (action == ACTION_REGISTER)
-        {
-            UI_ShowMessage("Quet the moi", "PB13:Quet DIP");
-            enter(STATE_REGISTER_SCAN);
-        }
-        else if (action == ACTION_DELETE)
-        {
-            selected = App_System_NextUser(-1);
-            if (selected < 0 || !App_System_GetUser(selected, &user))
-                result("Khong co the", NULL, 1500);
-            else
-            {
-                show_user(&user);
-                enter(STATE_DELETE_SELECT);
-            }
-        }
-        else
-        {
-            UI_ShowMessage("Pass moi: 6 so", "# OK, * Xoa");
-            enter(STATE_NEW_PASSWORD);
-        }
+    case STATE_AUTH:
+        State_Auth();
         break;
-    }
     case STATE_REGISTER_SCAN:
-        if (new_card && scanned.size == 5)
-        {
-            if (App_System_FindCard(&scanned) >= 0)
-            {
-                result("The da dang ky", NULL, 1500);
-                break;
-            }
-            pending_card = scanned;
-            AppUser_t preview = {0};
-            preview.card = pending_card;
-            show_user(&preview);
-            enter(STATE_REGISTER_CONFIRM);
-        }
+        State_RegisterScan();
         break;
     case STATE_REGISTER_CONFIRM:
-        if (bt1)
-        {
-            if (App_System_AddCard(&pending_card))
-                result("Dang ky thanh", "cong!", 2000);
-            else
-                result("Khong them duoc", "Bo nho day/loi", 2000);
-        }
+        State_RegisterConfirm();
         break;
     case STATE_DELETE_SELECT:
-        if (key == '*')
-            auth(STATE_DELETE_AUTH);
-        else if (bt2)
-        {
-            selected = App_System_NextUser(selected);
-            if (selected < 0 || !App_System_GetUser(selected, &user))
-                result("Khong co the", NULL, 1500);
-            else
-            {
-                show_user(&user);
-                timer = HAL_GetTick();
-            }
-        }
+        State_DeleteSelect();
         break;
-    case STATE_DELETE_AUTH: {
-        int done = password_key(key);
-        if (!done)
-            break;
-        if (done < 0 || !App_System_CheckPassword(password))
-            result("Sai mat khau", "Khong xoa the", 1500);
-        else if (App_System_DeleteUser(selected))
-            result("Xoa thanh cong", NULL, 2000);
-        else
-            result("Xoa that bai", "Kiem tra EEPROM", 2000);
+    case STATE_DELETE_AUTH:
+        State_DeleteAuth();
         break;
-    }
-    case STATE_NEW_PASSWORD: {
-        int done = password_key(key);
-        if (!done)
-            break;
-        if (done < 0)
-            result("Pass can 6 so", "Chua doi pass", 1500);
-        else if (App_System_ChangePassword(password))
-            result("Doi pass thanh", "cong!", 2000);
-        else
-            result("Loi luu pass", "Hay khoi dong lai", 2000);
+    case STATE_NEW_PASSWORD:
+        State_NewPassword();
         break;
-    }
     default:
         idle();
         break;
