@@ -1,8 +1,8 @@
+#include "printf.h"
 #include "driver_mcp79410.h"
 #include "driver_mcp_i2c_gpio.h"
 #include "stm32f1xx_hal.h"
 #include <string.h>
-#include <stdio.h>
 #define RTC_ADDR 0x6FU
 #define EEPROM_ADDR 0x57U
 

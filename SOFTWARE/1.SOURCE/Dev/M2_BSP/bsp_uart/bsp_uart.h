@@ -9,5 +9,6 @@ void BSP_UART_Task(void);
 int BSP_UART_ReadByte(uint8_t *value);
 uint16_t BSP_UART_TxSpace(void);
 void BSP_UART_SendString(const char *str);
+int BSP_UART_Printf(const char *format, ...);
 
 #endif

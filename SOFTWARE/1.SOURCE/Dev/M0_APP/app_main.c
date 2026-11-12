@@ -1,3 +1,4 @@
+#include "printf.h"
 #include "app_main.h"
 #include "app_system.h"
 #include "app_rfid.h"
@@ -6,7 +7,6 @@
 #include "app_keypad.h"
 #include "app_button.h"
 #include "bsp_rfid.h"
-#include <stdio.h>
 #include <string.h>
 #include "stm32f1xx_hal.h"
 

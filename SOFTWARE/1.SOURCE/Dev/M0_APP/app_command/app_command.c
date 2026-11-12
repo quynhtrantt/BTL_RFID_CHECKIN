@@ -1,9 +1,8 @@
+#include "printf.h"
 #include "app_command.h"
 #include "app_system.h"
 #include "app_clock.h"
 #include "bsp_uart.h"
-#include "uart_printf.h"
-#include <stdio.h>
 #include <string.h>
 
 #define COMMAND_SIZE 128U
@@ -113,14 +112,14 @@ static void send_response(void) {
         static const char *const lines[] = {
             "HELP BEGIN", "USERS - registered UID and name", "LOGS - last 2 successful scans",
             "TIME - current RTC", "HELP - command list", "HELP END"};
-        written = printf("%s\r\n", lines[output_index]);
+        written = BSP_UART_Printf("%s\r\n", lines[output_index]);
         last = output_index + 1U == sizeof(lines) / sizeof(lines[0]);
     }
     else if (reply == REPLY_USERS || reply == REPLY_LOGS)
     {
         const char *label = reply == REPLY_USERS ? "USERS" : "LOGS";
         if (!output_index)
-            written = printf("%s BEGIN count=%u\r\n", label, count);
+            written = BSP_UART_Printf("%s BEGIN count=%u\r\n", label, count);
         else if (output_index <= count)
         {
             unsigned i = output_index - 1;
@@ -128,7 +127,7 @@ static void send_response(void) {
             {
                 AppUser_t *user = &snapshot.users[i];
                 format_uid(user->card.uid, uid);
-                written = printf("%u | %s | %s\r\n", output_index, uid,
+                written = BSP_UART_Printf("%u | %s | %s\r\n", output_index, uid,
                                  user->name[0] ? user->name : "The khong ten");
             }
             else
@@ -137,30 +136,29 @@ static void send_response(void) {
                 format_uid(log->uid, uid);
                 if (!App_Clock_FormatFull(log->time, time))
                     strcpy(time, "RTC invalid");
-                written = printf("%u | %s | %s | %s | seq=%lu\r\n", output_index, uid,
+                written = BSP_UART_Printf("%u | %s | %s | %s | seq=%lu\r\n", output_index, uid,
                                  log->name[0] ? log->name : "The khong ten", time,
                                  (unsigned long)log->sequence);
             }
         }
         else
         {
-            written = printf("%s END\r\n", label);
+            written = BSP_UART_Printf("%s END\r\n", label);
             last = true;
         }
     }
     else if (reply == REPLY_TIME)
     {
-        written = printf("TIME %s\r\n", rtc_text);
+        written = BSP_UART_Printf("TIME %s\r\n", rtc_text);
         last = true;
     }
     else if (reply == REPLY_ERROR)
     {
-        written = printf("%s\r\n", error_text);
+        written = BSP_UART_Printf("%s\r\n", error_text);
         last = true;
     }
     if (written < 0)
     {
-        clearerr(stdout);
         return;
     }
     output_index++;
@@ -170,10 +168,9 @@ static void send_response(void) {
 
 bool App_Command_Init(void) {
     bool ready = BSP_UART_Init();
-    UART_Printf_Init();
     reply = REPLY_NONE;
     reset_line();
-    printf("UART READY 115200 8N1\r\nUSERS | LOGS | TIME | HELP\r\n");
+    BSP_UART_Printf("UART READY 115200 8N1\r\nUSERS | LOGS | TIME | HELP\r\n");
     return ready;
 }
 
