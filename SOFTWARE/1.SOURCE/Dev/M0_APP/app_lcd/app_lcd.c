@@ -1,6 +1,6 @@
+#include "printf.h"
 #include "app_lcd.h"
 #include "bsp_lcd.h"
-#include <stdio.h>
 
 bool App_LCD_Init(void) {
     BSP_LCD_Init();

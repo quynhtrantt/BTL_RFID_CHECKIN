@@ -147,3 +147,40 @@ void App_Clock_Format(uint32_t stamp, char line[17]) {
         line[pos[i] + 1] = '0' + values[i] % 10;
     }
 }
+
+bool App_Clock_FormatFull(uint32_t stamp, char line[20]) {
+    if (!line)
+        return false;
+    uint32_t n = stamp / 86400U;
+    unsigned year = 2000, month = 1;
+    while (year <= 2099 && n >= 365U + leap(year))
+    {
+        n -= 365U + leap(year);
+        year++;
+    }
+    if (year > 2099)
+    {
+        line[0] = 0;
+        return false;
+    }
+    while (n >= days(year, month))
+    {
+        n -= days(year, month);
+        month++;
+    }
+    memcpy(line, "00/00/0000 00:00:00", 20);
+    unsigned values[] = {(unsigned)n + 1, month, stamp / 3600U % 24U,
+                         stamp / 60U % 60U, stamp % 60U};
+    const unsigned positions[] = {0, 3, 11, 14, 17};
+    for (unsigned i = 0; i < 5; i++)
+    {
+        line[positions[i]] = '0' + values[i] / 10;
+        line[positions[i] + 1] = '0' + values[i] % 10;
+    }
+    for (int i = 9; i >= 6; i--)
+    {
+        line[i] = '0' + year % 10;
+        year /= 10;
+    }
+    return true;
+}

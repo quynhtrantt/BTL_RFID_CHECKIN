@@ -12,4 +12,5 @@ bool App_Clock_Init(void);
 bool App_Clock_Get(uint32_t *seconds_since_2000);
 bool App_Clock_Set(const AppDateTime_t *time);
 void App_Clock_Format(uint32_t seconds_since_2000, char line[17]);
+bool App_Clock_FormatFull(uint32_t seconds_since_2000, char line[20]);
 #endif
