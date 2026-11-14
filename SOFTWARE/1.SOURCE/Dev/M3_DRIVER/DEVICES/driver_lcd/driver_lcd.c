@@ -33,10 +33,6 @@ static void LCD_SendCmd(uint8_t cmd) {
     }
 }
 
-static void LCD_SendData(uint8_t data) {
-    LCD_SendByte(data, 1U);
-}
-
 void Driver_LCD_Init(uint8_t i2c_addr) {
     lcd_addr = i2c_addr;
 
@@ -81,8 +77,21 @@ void Driver_LCD_Print(const char *str) {
         return;
     }
 
+    uint8_t buffer[16U * 4U];
+    uint16_t length = 0U;
+
     for (uint8_t i = 0U; i < 16U && str[i] != '\0'; i++)
     {
-        LCD_SendData((uint8_t)str[i]);
+        uint8_t data = (uint8_t)str[i];
+        uint8_t hi = (uint8_t)((data & 0xF0U) | LCD_BL | LCD_RS);
+        uint8_t lo = (uint8_t)(((data << 4) & 0xF0U) | LCD_BL | LCD_RS);
+
+        buffer[length++] = (uint8_t)(hi | LCD_EN);
+        buffer[length++] = hi;
+        buffer[length++] = (uint8_t)(lo | LCD_EN);
+        buffer[length++] = lo;
     }
+
+    if (length != 0U)
+        Driver_PCF8574_WriteBuf(buffer, length);
 }

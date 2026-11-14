@@ -15,7 +15,7 @@ bool App_LCD_Init(void) {
     return true;
 }
 
-static void update_line(uint8_t row, const char *text) {
+static void update_line(uint8_t row, const char *text, bool partial) {
     char next[LCD_COLUMNS + 1U];
     memset(next, ' ', LCD_COLUMNS);
     next[LCD_COLUMNS] = 0;
@@ -24,6 +24,17 @@ static void update_line(uint8_t row, const char *text) {
     {
         for (unsigned i = 0; i < LCD_COLUMNS && text[i]; i++)
             next[i] = text[i];
+    }
+
+    if (!partial)
+    {
+        if (!display_valid || memcmp(displayed[row], next, LCD_COLUMNS) != 0)
+        {
+            BSP_LCD_SetCursor(0, row);
+            BSP_LCD_Print(next);
+            memcpy(displayed[row], next, LCD_COLUMNS);
+        }
+        return;
     }
 
     unsigned column = 0;
@@ -52,11 +63,14 @@ static void update_line(uint8_t row, const char *text) {
         memcpy(displayed[row] + start, next + start, length);
     }
 }
-
 void UI_ShowMessage(const char *line1, const char *line2) {
-    update_line(0, line1);
-    update_line(1, line2);
+    update_line(0, line1, false);
+    update_line(1, line2, false);
     display_valid = true;
+}
+
+void UI_UpdatePassword(const char *stars) {
+    update_line(1, stars, true);
 }
 
 void UI_ShowIdle(void) {

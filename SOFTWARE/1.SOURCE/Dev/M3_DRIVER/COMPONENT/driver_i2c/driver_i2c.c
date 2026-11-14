@@ -3,14 +3,22 @@
 #include "stdbool.h"
 #include <stddef.h>
 
-#define HALF_BIT_LOOPS 60U
+#define HALF_BIT_US 6U
 #define STRETCH_LOOPS 2000U
 
 static bool ready = false;
 
 static void HalfBit(void) {
-    for (volatile uint32_t i = 0; i < HALF_BIT_LOOPS; i++)
+    uint32_t ticks = (SystemCoreClock / 1000000U) * HALF_BIT_US;
+    uint32_t period = SysTick->LOAD + 1U;
+    uint32_t previous = SysTick->VAL;
+    uint32_t elapsed = 0U;
+
+    while (elapsed < ticks)
     {
+        uint32_t current = SysTick->VAL;
+        elapsed += previous >= current ? previous - current : previous + period - current;
+        previous = current;
     }
 }
 

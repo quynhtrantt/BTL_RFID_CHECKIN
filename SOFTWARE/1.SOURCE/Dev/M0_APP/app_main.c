@@ -100,7 +100,7 @@ static void show_user(const AppUser_t *u) {
 
 static void auth(AppState_t next) {
     clear_pass();
-    UI_ShowMessage("Nhap pass hien tai", "# OK, * Xoa");
+    UI_ShowMessage("Nhap pass hien tai", NULL);
     enter(next);
 }
 
@@ -121,8 +121,7 @@ static int password_key(char key) {
     }
     char stars[APP_PASS_LENGTH + 1] = {0};
     memset(stars, '*', pass_length);
-    UI_ShowMessage(state == STATE_NEW_PASSWORD ? "Pass moi: 6 so" : "Nhap pass hien tai",
-                   pass_overflow ? "Qua dai! * Xoa" : stars);
+    UI_UpdatePassword(pass_overflow ? "Qua dai! * Xoa" : stars);
     return 0;
 }
 
@@ -270,7 +269,7 @@ static void State_Auth(void) {
     }
     else
     {
-        UI_ShowMessage("Pass moi: 6 so", "# OK, * Xoa");
+        UI_ShowMessage("Pass moi: 6 so", NULL);
         enter(STATE_NEW_PASSWORD);
     }
 }
