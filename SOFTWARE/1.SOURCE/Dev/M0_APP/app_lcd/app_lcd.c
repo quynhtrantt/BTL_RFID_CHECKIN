@@ -1,24 +1,76 @@
 #include "printf.h"
 #include "app_lcd.h"
 #include "bsp_lcd.h"
+#include <string.h>
+
+#define LCD_ROWS 2U
+#define LCD_COLUMNS 16U
+
+static char displayed[LCD_ROWS][LCD_COLUMNS];
+static bool display_valid;
 
 bool App_LCD_Init(void) {
     BSP_LCD_Init();
+    display_valid = false;
     return true;
 }
 
+static void update_line(uint8_t row, const char *text, bool partial) {
+    char next[LCD_COLUMNS + 1U];
+    memset(next, ' ', LCD_COLUMNS);
+    next[LCD_COLUMNS] = 0;
+
+    if (text)
+    {
+        for (unsigned i = 0; i < LCD_COLUMNS && text[i]; i++)
+            next[i] = text[i];
+    }
+
+    if (!partial)
+    {
+        if (!display_valid || memcmp(displayed[row], next, LCD_COLUMNS) != 0)
+        {
+            BSP_LCD_SetCursor(0, row);
+            BSP_LCD_Print(next);
+            memcpy(displayed[row], next, LCD_COLUMNS);
+        }
+        return;
+    }
+
+    unsigned column = 0;
+    while (column < LCD_COLUMNS)
+    {
+        if (display_valid && displayed[row][column] == next[column])
+        {
+            column++;
+            continue;
+        }
+
+        unsigned start = column;
+        char changed[LCD_COLUMNS + 1U];
+        unsigned length = 0;
+
+        do
+        {
+            changed[length++] = next[column];
+            column++;
+        } while (column < LCD_COLUMNS &&
+                 (!display_valid || displayed[row][column] != next[column]));
+
+        changed[length] = 0;
+        BSP_LCD_SetCursor((uint8_t)start, row);
+        BSP_LCD_Print(changed);
+        memcpy(displayed[row] + start, next + start, length);
+    }
+}
 void UI_ShowMessage(const char *line1, const char *line2) {
-    BSP_LCD_Clear();
-    if (line1)
-    {
-        BSP_LCD_SetCursor(0, 0);
-        BSP_LCD_Print(line1);
-    }
-    if (line2)
-    {
-        BSP_LCD_SetCursor(0, 1);
-        BSP_LCD_Print(line2);
-    }
+    update_line(0, line1, false);
+    update_line(1, line2, false);
+    display_valid = true;
+}
+
+void UI_UpdatePassword(const char *stars) {
+    update_line(1, stars, true);
 }
 
 void UI_ShowIdle(void) {
